@@ -102,5 +102,16 @@
         "confidence": "95",
         "agent_advice": "Advice: Execute test cases and ensure all edge cases are covered.",
         "artifact_path": "Artifact saved to: /Users/ashishmishra/BuildAgenticSystems/sdlc-phase-agent/data/artifacts/testing/193158_testing_doc.md"
+    },
+    {
+        "id": "bbaf83a8",
+        "description": "Create a customer feedback system that allows users to submit ratings and comments about our products",
+        "client": "Ashish",
+        "project": "FeedbackHub",
+        "timestamp": "2026-10-17T19:56:01.762372",
+        "phase": "requirements",
+        "confidence": "90",
+        "agent_advice": "Advice: Document detailed user stories and stakeholder acceptance criteria.",
+        "artifact_path": "Artifact saved to: /Users/ashishmishra/BuildAgenticSystems/sdlc-phase-agent/data/artifacts/requirements/195601_requirements_doc.md"
     }
 ]

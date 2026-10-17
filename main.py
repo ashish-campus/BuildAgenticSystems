@@ -26,7 +26,10 @@ def main():
             requests = get_all_requests()
             print(f"\n--- Total Requests: {len(requests)} ---")
             for req in requests:
-                print(f"[{req['phase'].upper()}] {req['description'][:50]}... (Confidence: {req['confidence']}%)")
+                phase = req.get('phase', 'UNKNOWN').upper()
+                desc = req.get('description', 'No description available')[:50]
+                conf = req.get('confidence', '0')
+                print(f"[{phase}] {desc}... (Confidence: {conf}%)")
                 
         elif choice == '3':
             generate_dashboard()
