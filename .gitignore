@@ -1,3 +1,13 @@
+# Security
 .env
-.env.example
+
+# Python Virtual Environment & Caches
+.venv/
+env/
+__pycache__/
 *.pyc
+
+# Local Data & Generated Artifacts
+data/artifacts/
+data/dashboards/
+data/requests.json

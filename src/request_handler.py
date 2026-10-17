@@ -1,6 +1,7 @@
 from dataclasses import dataclass, asdict
 from datetime import datetime
 import uuid
+import re
 from src.storage import save_request, load_requests
 from src.agent import LangChainAgent
 from src.artifact_generator import generate_artifact
@@ -20,8 +21,18 @@ class FeatureRequest:
     artifact_path: str = ""
 
 def validate_description(description: str) -> bool:
-    """Validates that the description is between 10 and 500 characters."""
-    return 10 <= len(description.strip()) <= 500
+    clean_desc = description.strip()
+
+    if not (10 <= len(clean_desc) <= 500):
+        print("Error: Description must be between 10 and 500 characters.")
+        return False
+
+    forbidden_patterns = r'(<script>|system:|ignore previous|you are now)'
+    if re.search(forbidden_patterns, clean_desc, re.IGNORECASE):
+        print("Error: Unsafe characters or command overrides detected in the request.")
+        return False
+        
+    return True
 
 def create_request(description: str, client: str, project: str) -> bool:
     """Creates, validates, and stores a new feature request."""
@@ -32,7 +43,6 @@ def create_request(description: str, client: str, project: str) -> bool:
     print("Analyzing request with LLM...")
     agent_result = sdlc_agent.process(description)
 
-    # NEW: Trigger artifact generation based on detected phase
     artifact_msg = generate_artifact(
         description=description, 
         phase=agent_result["phase"],
