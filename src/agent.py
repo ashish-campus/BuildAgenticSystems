@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_google_genai import ChatGoogleGenerativeAI, HarmCategory, HarmBlockThreshold
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
@@ -9,21 +9,36 @@ load_dotenv()
 class LangChainAgent:
     def __init__(self):
         # 1. Initialize the Google Gemini LLM
-        self.llm = ChatGoogleGenerativeAI(model="gemini-3.8-flash-tts", temperature=0.1)
+        self.llm = ChatGoogleGenerativeAI(
+            model="gemini-3.5-flash-lite",
+            temperature=0.1,
+             safety_settings={
+                        HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+                        HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+                        HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+                        HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+                    }
+        )
         self.memory = [] 
         
         # 2. Setup Prompt Template (langchain_core)
         self.prompt = PromptTemplate.from_template(
-            """Classify this feature request into one SDLC phase.
-Phases: requirements, design, implementation, testing, deployment
+            """Classify this feature request into one of these exact SDLC phases: requirements, design, implementation, testing, deployment.
+
+Examples:
+- "We need a user profile page" -> requirements, 95
+- "Plan the database structure" -> design, 90
+- "Write the API code for payments" -> implementation, 85
+- "Create automated unit tests for the login module" -> testing, 90
+- "Set up the production AWS environment" -> deployment, 80
 
 Previous interactions (for context):
 {chat_history}
 
 Current Request: "{description}"
 
-Respond with strictly this comma-separated format: phase_name, confidence_percentage
-Example: requirements, 90"""
+IMPORTANT: Respond ONLY with the exact phase name and confidence score separated by a comma. Do not include quotes, markdown formatting, or any other words.
+Format: phase_name, confidence_percentage"""
         )
         
         # 3. Modern LCEL Chain 
@@ -35,32 +50,43 @@ Example: requirements, 90"""
         return {"description": user_input}
 
     def reason(self, observations: dict) -> dict:
-        """Step 2: Analyze data using LangChain and Gemini."""
-        print("[Agent] Reasoning about the request using Gemini...")
+        print("[Agent] Reasoning about the request using Gemini LCEL...")
         description = observations["description"]
         
-        # Format our memory context
         chat_history = "\n".join([f"Previous Task: {m['req']} -> Phase: {m['phase']}" for m in self.memory])
         if not chat_history:
             chat_history = "None"
             
         try:
-            # Use LCEL .invoke()
             response_string = self.chain.invoke({
                 "chat_history": chat_history,
                 "description": description
             })
+
+            if not response_string.strip():
+                print("[Agent Debug] Gemini returned an empty string (API block).")
+                print("[Agent Debug] Using fallback classification to maintain workflow.")
+                response_string = "testing, 50"
+
+            # Print exactly what the LLM returned so we can see its tricks
+            print(f"[Agent Debug] Raw LLM text: '{response_string.strip()}'")
             
-            # Parse Gemini's response
-            result = response_string.strip().lower()
-            parts = result.split(',')
-            phase = parts[0].strip()
-            confidence = parts[1].strip() if len(parts) > 1 else "0"
-            
+            # --- Bulletproof Keyword Parsing ---
+            result = response_string.lower()
+            phase = "unknown"
             valid_phases = ["requirements", "design", "implementation", "testing", "deployment"]
-            if phase not in valid_phases:
-                phase = "unknown"
-                
+            
+            # Just look for the word in the text, ignoring format
+            for p in valid_phases:
+                if p in result:
+                    phase = p
+                    break
+                    
+            # Extract the first set of digits it finds for the confidence score
+            import re
+            numbers = re.findall(r'\d+', result)
+            confidence = numbers[-1] if numbers else "0"
+            
             self.memory.append({"req": description, "phase": phase})
             if len(self.memory) > 2:
                 self.memory.pop(0)

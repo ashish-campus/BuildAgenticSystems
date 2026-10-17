@@ -3,6 +3,7 @@ from datetime import datetime
 import uuid
 from src.storage import save_request, load_requests
 from src.agent import LangChainAgent
+from src.artifact_generator import generate_artifact
 
 sdlc_agent = LangChainAgent()
 
@@ -16,6 +17,7 @@ class FeatureRequest:
     phase: str = "pending"
     confidence: str = "0"
     agent_advice: str = ""
+    artifact_path: str = ""
 
 def validate_description(description: str) -> bool:
     """Validates that the description is between 10 and 500 characters."""
@@ -29,6 +31,17 @@ def create_request(description: str, client: str, project: str) -> bool:
     
     print("Analyzing request with LLM...")
     agent_result = sdlc_agent.process(description)
+
+    # NEW: Trigger artifact generation based on detected phase
+    artifact_msg = generate_artifact(
+        description=description, 
+        phase=agent_result["phase"],
+        project=project,
+        client=client,
+        model_name="gemini-3.5-flash-lite"
+    )
+    print(f">> {artifact_msg}")
+    print("------------------------\n")
         
     new_request = FeatureRequest(
         id=str(uuid.uuid4())[:8],
@@ -38,7 +51,8 @@ def create_request(description: str, client: str, project: str) -> bool:
         timestamp=datetime.now().isoformat(),
         phase=agent_result["phase"],
         confidence=agent_result["confidence"],
-        agent_advice=agent_result["advice"]
+        agent_advice=agent_result["advice"],
+        artifact_path=artifact_msg
     )
     
     return save_request(asdict(new_request))

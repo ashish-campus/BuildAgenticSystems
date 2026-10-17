@@ -58,5 +58,49 @@
         "phase": "unknown",
         "confidence": "0",
         "agent_advice": "Let's proceed with standard SDLC practices."
+    },
+    {
+        "id": "2de57229",
+        "description": "Create a suite of automated unit tests for the payment processor.",
+        "client": "Ashish",
+        "project": "myProj",
+        "timestamp": "2026-10-17T19:10:20.159074",
+        "phase": "error",
+        "confidence": "0",
+        "agent_advice": "Let's proceed with standard SDLC practices.",
+        "artifact_path": "No artifact generated. Phase unknown or unsupported."
+    },
+    {
+        "id": "c677d459",
+        "description": "Create a suite of automated unit tests for the payment processor.",
+        "client": "Ashish",
+        "project": "myProj",
+        "timestamp": "2026-10-17T19:15:07.217853",
+        "phase": "error",
+        "confidence": "0",
+        "agent_advice": "Let's proceed with standard SDLC practices.",
+        "artifact_path": "No artifact generated. Phase unknown or unsupported."
+    },
+    {
+        "id": "7b38bb8d",
+        "description": "Create a suite of automated unit tests for the payment processor.",
+        "client": "Ashish",
+        "project": "myProj",
+        "timestamp": "2026-10-17T19:23:10.794570",
+        "phase": "error",
+        "confidence": "0",
+        "agent_advice": "Let's proceed with standard SDLC practices.",
+        "artifact_path": "No artifact generated. Phase unknown or unsupported."
+    },
+    {
+        "id": "2c58e50d",
+        "description": "Create a suite of automated unit tests for the payment processor.",
+        "client": "Ashish",
+        "project": "myProj",
+        "timestamp": "2026-10-17T19:31:58.117385",
+        "phase": "testing",
+        "confidence": "95",
+        "agent_advice": "Advice: Execute test cases and ensure all edge cases are covered.",
+        "artifact_path": "Artifact saved to: /Users/ashishmishra/BuildAgenticSystems/sdlc-phase-agent/data/artifacts/testing/193158_testing_doc.md"
     }
 ]
