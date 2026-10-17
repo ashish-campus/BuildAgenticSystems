@@ -1,41 +1,78 @@
-from src.phase_detector import detect_phase
+import os
+from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import PromptTemplate
 
-class SimpleAgent:
+load_dotenv()
+
+class LangChainAgent:
     def __init__(self):
+        self.llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.1)
         self.memory = []
 
+        self.prompt = PromptTemplate.from_template(
+            """Classify this feature request into one SDLC phase.
+Phases: requirements, design, implementation, testing, deployment
+
+Previous interactions (for context):
+{chat_history}
+
+Current Request: "{description}"
+
+Respond with strictly this comma-separated format: phase_name, confidence_percentage
+Example: requirements, 90"""
+        )
+
+        self.chain = self.prompt | self.llm
+
     def observe(self, user_input: str) -> dict:
-        """Step 1: Collect basic information and context."""
-        print("[Agent] Observing input and gathering context...")
-        return {
-            "description": user_input,
-            "previous_context": list(self.memory)
-        }
+        """Step 1: Collect basic information."""
+        print("[Agent] Observing input...")
+        return {"description": user_input}
 
     def reason(self, observations: dict) -> dict:
-        """Step 2: Analyze the data using the LLM and memory."""
-        print("[Agent] Reasoning about the request...")
+        """Step 2: Analyze data using LangChain LCEL."""
+        print("[Agent] Reasoning about the request using LangChain LCEL...")
         description = observations["description"]
 
-        detection = detect_phase(description)
-        phase = detection.get("phase", "unknown")
-        confidence = detection.get("confidence", "0")
-        
-        reasoning_text = f"I identified this as '{phase}' with {confidence}% confidence."
-        
-        if observations["previous_context"]:
-            last_req = observations["previous_context"][-1]
-            reasoning_text += f" (Context noted: Following up on previous '{last_req['phase']}' task)."
+        chat_history = "\n".join([f"Previous Task: {m['req']} -> Phase: {m['phase']}" for m in self.memory])
+        if not chat_history:
+            chat_history = "None"
+            
+        try:
+            response = self.chain.invoke({
+                "chat_history": chat_history,
+                "description": description
+            })
 
-        return {
-            "description": description,
-            "phase": phase,
-            "confidence": confidence,
-            "reasoning": reasoning_text
-        }
+            result = response.content.strip().lower()
+            parts = result.split(',')
+            phase = parts[0].strip()
+            confidence = parts[1].strip() if len(parts) > 1 else "0"
+            
+            valid_phases = ["requirements", "design", "implementation", "testing", "deployment"]
+            if phase not in valid_phases:
+                phase = "unknown"
+
+            self.memory.append({"req": description, "phase": phase})
+            if len(self.memory) > 2:
+                self.memory.pop(0)
+                
+            reasoning_text = f"Identified as '{phase}' with {confidence}% confidence via LangChain."
+            
+            return {
+                "description": description,
+                "phase": phase,
+                "confidence": confidence,
+                "reasoning": reasoning_text
+            }
+            
+        except Exception as e:
+            print(f"\n[!] LangChain Error: {e}")
+            return {"description": description, "phase": "error", "confidence": "0", "reasoning": "Error processing request."}
 
     def act(self, reasoning: dict) -> dict:
-        """Step 3: Determine the best action/advice and update memory."""
+        """Step 3: Determine the best action/advice."""
         print("[Agent] Formulating action and advice...")
         phase = reasoning["phase"]
         
@@ -50,10 +87,6 @@ class SimpleAgent:
             advice = "Advice: Execute test cases and ensure all edge cases are covered."
         elif phase == "deployment":
             advice = "Advice: Review deployment checklists and verify rollback plans."
-
-        self.memory.append({"description": reasoning["description"], "phase": phase})
-        if len(self.memory) > 2:
-            self.memory.pop(0)
 
         return {
             "phase": phase,

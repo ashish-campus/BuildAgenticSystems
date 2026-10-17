@@ -38,5 +38,45 @@
         "phase": "design",
         "confidence": "95",
         "agent_advice": "Advice: Create architecture diagrams and define API contracts."
+    },
+    {
+        "id": "9999eb93",
+        "description": "We need a user profile page.",
+        "client": "Ashish",
+        "project": "myProj",
+        "timestamp": "2026-10-17T14:46:17.527057",
+        "phase": "error",
+        "confidence": "0",
+        "agent_advice": "Let's proceed with standard SDLC practices."
+    },
+    {
+        "id": "62722e93",
+        "description": "This is a test",
+        "client": "Ashish",
+        "project": "myProj",
+        "timestamp": "2026-10-17T14:49:31.675748",
+        "phase": "error",
+        "confidence": "0",
+        "agent_advice": "Let's proceed with standard SDLC practices."
+    },
+    {
+        "id": "dc3b3458",
+        "description": "This is my new feature",
+        "client": "Ashish",
+        "project": "myProj",
+        "timestamp": "2026-10-17T15:00:13.699812",
+        "phase": "error",
+        "confidence": "0",
+        "agent_advice": "Let's proceed with standard SDLC practices."
+    },
+    {
+        "id": "0892b9f9",
+        "description": "thid a,sdansldal",
+        "client": "Ashish",
+        "project": "myProj",
+        "timestamp": "2026-10-17T15:02:36.783522",
+        "phase": "error",
+        "confidence": "0",
+        "agent_advice": "Let's proceed with standard SDLC practices."
     }
 ]

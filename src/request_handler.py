@@ -2,10 +2,9 @@ from dataclasses import dataclass, asdict
 from datetime import datetime
 import uuid
 from src.storage import save_request, load_requests
-from src.phase_detector import detect_phase
-from src.agent import SimpleAgent
+from src.agent import LangChainAgent
 
-sdlc_agent = SimpleAgent()
+sdlc_agent = LangChainAgent()
 
 @dataclass
 class FeatureRequest:
