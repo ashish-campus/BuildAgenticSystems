@@ -2,6 +2,7 @@ from dataclasses import dataclass, asdict
 from datetime import datetime
 import uuid
 from src.storage import save_request, load_requests
+from src.phase_detector import detect_phase
 
 @dataclass
 class FeatureRequest:
@@ -10,6 +11,8 @@ class FeatureRequest:
     client: str
     project: str
     timestamp: str
+    phase: str = "pending"
+    confidence: str = "0"
 
 def validate_description(description: str) -> bool:
     """Validates that the description is between 10 and 500 characters."""
@@ -20,13 +23,18 @@ def create_request(description: str, client: str, project: str) -> bool:
     if not validate_description(description):
         print("Error: Description must be between 10 and 500 characters.")
         return False
+    
+    print("Analyzing request with LLM...")
+    detection_result = detect_phase(description)
         
     new_request = FeatureRequest(
         id=str(uuid.uuid4())[:8],
         description=description.strip(),
         client=client.strip(),
         project=project.strip(),
-        timestamp=datetime.now().isoformat()
+        timestamp=datetime.now().isoformat(),
+        phase=detection_result["phase"],
+        confidence=detection_result["confidence"]
     )
     
     return save_request(asdict(new_request))
