@@ -3,6 +3,9 @@ from datetime import datetime
 import uuid
 from src.storage import save_request, load_requests
 from src.phase_detector import detect_phase
+from src.agent import SimpleAgent
+
+sdlc_agent = SimpleAgent()
 
 @dataclass
 class FeatureRequest:
@@ -13,6 +16,7 @@ class FeatureRequest:
     timestamp: str
     phase: str = "pending"
     confidence: str = "0"
+    agent_advice: str = ""
 
 def validate_description(description: str) -> bool:
     """Validates that the description is between 10 and 500 characters."""
@@ -25,7 +29,7 @@ def create_request(description: str, client: str, project: str) -> bool:
         return False
     
     print("Analyzing request with LLM...")
-    detection_result = detect_phase(description)
+    agent_result = sdlc_agent.process(description)
         
     new_request = FeatureRequest(
         id=str(uuid.uuid4())[:8],
@@ -33,8 +37,9 @@ def create_request(description: str, client: str, project: str) -> bool:
         client=client.strip(),
         project=project.strip(),
         timestamp=datetime.now().isoformat(),
-        phase=detection_result["phase"],
-        confidence=detection_result["confidence"]
+        phase=agent_result["phase"],
+        confidence=agent_result["confidence"],
+        agent_advice=agent_result["advice"]
     )
     
     return save_request(asdict(new_request))

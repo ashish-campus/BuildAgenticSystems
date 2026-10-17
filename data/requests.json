@@ -28,5 +28,15 @@
         "timestamp": "2026-10-17T12:24:26.180558",
         "phase": "error",
         "confidence": "0"
+    },
+    {
+        "id": "445e4962",
+        "description": "Design the database schema for the new customer portal.",
+        "client": "Ashish",
+        "project": "myProj",
+        "timestamp": "2026-10-17T13:40:43.718899",
+        "phase": "design",
+        "confidence": "95",
+        "agent_advice": "Advice: Create architecture diagrams and define API contracts."
     }
 ]

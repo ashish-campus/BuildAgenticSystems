@@ -33,10 +33,12 @@ def handle_view_requests():
         print(f"Project: {req['project']} | Client: {req['client']}")
         print(f"Description: {req['description']}")
         
-        # Use .get() to prevent errors on older requests created in Milestone 1
         phase = req.get('phase', 'unclassified')
         confidence = req.get('confidence', 'N/A')
         print(f"Predicted Phase: {phase.upper()} (Confidence: {confidence}%)")
+        advice = req.get('agent_advice', '')
+        if advice:
+            print(f"Agent {advice}")
         print("-" * 30)
 
 def handle_run_analytics():

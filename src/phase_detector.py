@@ -22,7 +22,7 @@ Example: requirements, 90"""
 
     try:
         response = client.chat.completions.create(
-            model="gemini-3.1-pro-preview",
+            model="gemini-3.8-flash",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.1 
         )
